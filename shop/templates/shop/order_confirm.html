@@ -20,32 +20,6 @@ enctype="multipart/form-data" role="form" class="form-horizontal">
 <h2 id='confirm_title'>Оформлення замовлення</h2>
 
 
-
-<div id='basket_details'>
-<div class="row">
-  <div class="col-sm-2">Назва</div>
-  <div class="col-sm-2 price_title">Ціна</div>
-</div>
-{% for fl in flowers %}
-<div class="one_confirm">
-<div class="row">
-  <div class="col-sm-2">{{ fl.title }}</div>
-  <div class="col-sm-3 one_price">{{ fl.price }} грн</div>
-  <div><button class='from_basket' value='{{ fl.lat_title }}'>Видалити
-  </button>
-  </div>
-</div>
-</div>
-{% endfor %}
-<div id='suma_form'>
-<div class="row">
-Сума замовлення  {{price_list}} грн
-</div>
-</div>
-</div>
-
-
-
 <div class="form-group">
   <label class="col-sm-2 control-label">Імя*</label>
   <div class="col-sm-10">

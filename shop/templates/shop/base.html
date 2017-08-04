@@ -40,7 +40,7 @@
         <li role='presentation' {% if request.path == '/' %}class="active"{% endif %}><a href='{% url 'main' %}'>Саджанці та насіння</a></li>
         <li role='presentation' {% if '/pro_mene' in request.path %}class="active"{% endif %}><a href='{% url 'about' %}'>Про мене</a></li>
         <li role='presentation' {% if '/kontakty' in request.path %}class="active"{% endif %}><a href='{% url 'contacts' %}'>Контакти</a></li>
-        <li role='presentation' {% if '/koshyk' in request.path %}class="active"{% endif %}><a href='{% url 'order_confirm' %}'>Замовити</a></li>
+        <li role='presentation' {% if '/koshyk' in request.path %}class="active"{% endif %}><a href='{% url 'basket' %}'>Кошик</a></li>
         {% if user.is_authenticated %}
         <li role='presentation' {% if '/samovlenya' in request.path %}class="active"{% endif %}><a href='{% url 'orders' %}'>готові замовлення</a></li>
         {% endif %}

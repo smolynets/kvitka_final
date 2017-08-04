@@ -12,16 +12,13 @@
 
 
 
-<form action="{% url "basket" %}" method="post"
-enctype="multipart/form-data" role="form" class="form-horizontal" id='myform'>
 
-{% csrf_token %}
 
 <h2 id='basket_title'>В кошику</h2>
 
 
 
-<div>
+<div class='row col-xs-8 col-xs-offset-2'>
  <table class="table">
 
   <thead>
@@ -36,19 +33,25 @@ enctype="multipart/form-data" role="form" class="form-horizontal" id='myform'>
   <tr>
    <td>{{ fl.title }}</td>
    <td>{{ fl.price }} грн</td>
+   <td><button class='from_basket' value='{{ fl.lat_title }}'>Видалити
+  </button></td>
    </tr>
   {% endfor %}
   </tbody>
  </table>
  </div>
- 
-<div id='basket_button'>
- <a href='{% url 'main' %}' class="btn btn-link">повернутись</a>
- <a href='{% url 'order_confirm' %}' class="btn btn-link">замовити</a>
+ </div>
+
+<div class="row col-xs-8 col-xs-offset-2">
+<div id='suma_basket'>
+Сума замовлення  {{price_list}} грн
 </div>
-
-</form>
-
+</div>
+ 
+<div id='basket_button' class='row col-xs-8 col-xs-offset-2'>
+ <a href='{% url 'main' %}' class="btn btn-primary">повернутись</a>
+ <a href='{% url 'order_confirm' %}' class="btn btn-primary">замовити</a>
+</div>
 
 
 {% else %}

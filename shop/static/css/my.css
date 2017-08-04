@@ -105,7 +105,7 @@ footer {
 }
 
 #basket_title{
-	margin-left: 220px;
+	text-align: center;
 }
 
 #suma{
@@ -298,7 +298,7 @@ footer {
 	margin-top: 30px;
 }
 
-#suma_form{
+#suma_basket{
 	margin-bottom: 20px;
 }
 
@@ -334,3 +334,5 @@ footer {
        -o-transition: border .2s ease-in-out;
           transition: border .2s ease-in-out;
 }
+
+
