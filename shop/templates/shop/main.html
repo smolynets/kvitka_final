@@ -11,7 +11,7 @@
     {% else %}
     <div class="alert alert-warning">
        {% if buy_status %}
-       В кошику {{count}} {{ fl_count }}. <a href='{% url "basket" %}' class="">Переглянути їх?</a>
+       В кошику {{count}} {{ fl_count }}. <a href='{% url "basket" %}'>Переглянути їх?</a>
       {% else %}
       Для замовлення будь-ласка натисніть на кнопку "купити", а після цього перейдіть в закладку "кошик", де зможити оформити замовлення!
       {% endif %}
