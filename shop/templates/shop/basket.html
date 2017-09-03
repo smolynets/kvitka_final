@@ -1,56 +1,58 @@
-{% extends 'shop/base.html' %}
-{% load static from staticfiles %}
+{% extends "shop/base.html" %}
 
-
-
-<title>{% block title %}Купівля насіння та саджанців квітів{% endblock title %}</title>
-
+{% block title %}
+  
+{% endblock %}
 
 {% block content %}
-{% if flowers %}
-
-
-
-
-
+{% if cart %}
 
 <h2 id='basket_title'>В кошику</h2>
 
-
-
-<div class='row col-xs-8 col-xs-offset-2'>
+  <div class='row col-xs-8 col-xs-offset-2'>
  <table class="table">
 
   <thead>
    <tr>
     <th>Назва</th>
+    <th>Кількість</th>
     <th>Ціна</th>
+    <th>Повна ціна</th>
    </tr>
   </thead>
 
   <tbody>
-  {% for fl in flowers %}
+  {% for item in cart %}
+        {% with flower=item.flower %}
   <tr>
-   <td>{{ fl.title }}</td>
-   <td>{{ fl.price }} грн</td>
-   <td><button class='from_basket' value='{{ fl.lat_title }}'>Видалити
-  </button></td>
+   <td>{{ flower.title }}</td>
+   <td>
+      <form action="{% url "CartAdd_basket" flower.id %}" method="post" class="add">
+    {{ item.update_quantity_form.quantity }}
+    {{ item.update_quantity_form.update }}
+    {% csrf_token %}
+    <input type="submit" value="Обновити">
+</form>
+   </td>
+   <td>{{ item.price }} грн</td>
+   <th>{{ item.total_price }}грн</th>
+   <td>
+   <a href="{% url "CartRemove" flower.id %}">Видалити
+  </td>
    </tr>
-  {% endfor %}
+  {% endwith %}
+      {% endfor %}
+      <td class="num">Загальна сума {{ cart.get_total_price }} грн.</td>
   </tbody>
  </table>
  </div>
  </div>
 
-<div class="row col-xs-8 col-xs-offset-2">
-<div id='suma_basket'>
-Сума замовлення  {{price_list}} грн
-</div>
-</div>
+
  
 <div id='basket_button' class='row col-xs-8 col-xs-offset-2'>
  <a href='{% url 'main' %}' class="btn btn-primary">повернутись</a>
- <a href='{% url 'order_confirm' %}' class="btn btn-primary">замовити</a>
+ <a href="{% url "OrderCreate" %}" class="btn btn-primary">замовити</a>
 </div>
 
 
@@ -60,16 +62,4 @@
  </div>
 
  {% endif %}
-
-
- 
-
 {% endblock content %}
-
-
-    
-
-
-
-
-    

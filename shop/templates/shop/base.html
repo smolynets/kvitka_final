@@ -1,10 +1,11 @@
+{% load i18n %}
 {% load static from staticfiles %}
 
 <!DOCTYPE html>
 <html lang='uk'>
   <head>
   	<meta charset='UTF-8'/>
-    <title>Квітка</title>
+    <title>{% trans 'Квітка' %}</title>
   	<meta name='description'
       value='Про квіти' />
       <!-- Include Styles -->
@@ -14,19 +15,47 @@
   </head>
   <body class="body">
 
-<div id='registration'>
+
+<div class="row">
+ <div class='col-xs-4'>
+<div class='registration'>
 {% if user.is_authenticated %}
  {{ user.username }} |
-   <a href='{% url 'users:auth_logout' %}'>Вийти</a>
+   <a href='{% url 'users:auth_logout' %}'>{% trans 'Вийти' %}</a>
 {% else %}
-   <a href='{% url 'users:auth_login' %}'>Ввійти</a>
+   <a href='{% url 'users:auth_login' %}'>{% trans 'Ввійти' %}</a>
+   |
+   <a href="{% url "users:registration_register" %}">Зареєструватися</a>
 {% endif %}
 </div>
+    </div>
+
+
+    <div class="col-xs-4" id="lang-selector">
+    {{PK}} 
+    <select>
+    <option value="">{% trans 'Змінити мову' %}</option>
+    <option value="uk">українська</option>
+    <option value="en">english</option>  
+    </select> 
+    </div>
+
+
+    <div class='col-xs-4 form-search'>
+     <form action="{% url "search" %}" method="post">
+       {% csrf_token %}
+      <input type="text" name="search" class="input-medium search-query">
+      <button type="submit" class="btn">{% trans 'Знайти' %}</button>
+      <span class="help-block">{{ errors.title }}</span>
+     </form>
+    </div>
+    </div>
+
 
   	<!-- Logo -->
   	<div class="row">
     <div class='col-xs-12'>
-      <h1 id='title'>{% block title %}{% endblock title %}</h1>
+      <h1 id='title'>{% trans "Купівля насіння та саджанців квітів" %}</h1>
 
 
 
@@ -37,12 +66,15 @@
     <div class='row' id='sub-header'>
       <div class='col-xs-12'>
        <ul class='nav nav-pills' role='tablist'>
-        <li role='presentation' {% if request.path == '/' %}class="active"{% endif %}><a href='{% url 'main' %}'>Саджанці та насіння</a></li>
-        <li role='presentation' {% if '/pro_mene' in request.path %}class="active"{% endif %}><a href='{% url 'about' %}'>Про мене</a></li>
-        <li role='presentation' {% if '/kontakty' in request.path %}class="active"{% endif %}><a href='{% url 'contacts' %}'>Контакти</a></li>
-        <li role='presentation' {% if '/koshyk' in request.path %}class="active"{% endif %}><a href='{% url 'basket' %}'>Кошик</a></li>
+        <li role='presentation' {% if request.path == '/' %}class="active"{% endif %}><a href='{% url 'main' %}'>{% trans "Головна" %}</a></li>
+        <li role='presentation' {% if '/pro_mene' in request.path %}class="active"{% endif %}><a href='{% url 'about' %}'>{% trans "Про мене" %}</a></li>
+        <li role='presentation' {% if '/kontakty' in request.path %}class="active"{% endif %}><a href='{% url 'contacts' %}'>{% trans "Контакти" %}</a></li>
+        <li role='presentation' {% if '/basket' in request.path %}class="active"{% endif %}><a href='{% url 'basket' %}'>{% trans "Кошик" %}</a></li>
+        {% if perms.auth.add_user %}
+        <li role='presentation' {% if '/samovlenya' in request.path %}class="active"{% endif %}><a href='{% url 'orders' %}'>{% trans "готові замовлення" %}</a></li>
+        {% endif %}
         {% if user.is_authenticated %}
-        <li role='presentation' {% if '/samovlenya' in request.path %}class="active"{% endif %}><a href='{% url 'orders' %}'>готові замовлення</a></li>
+        <li role='presentation' {% if '/kabinet' in request.path %}class="active"{% endif %}><a href='{% url 'kabinet' %}'>{% trans "мій кабінет" %}</a></li>
         {% endif %}
        </ul>
       </div>
@@ -74,6 +106,9 @@
    </div>
 
   </div>
+
+
+
 
   	<!-- Start Footer -->
     <div class="row">

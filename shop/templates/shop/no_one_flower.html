@@ -1,0 +1,36 @@
+{% extends 'shop/base.html' %}
+{% load static from staticfiles %}
+
+<title>{% block title %}Купівля насіння та саджанців квітів{% endblock title %}</title>
+
+
+    {% block content %}
+    {% if request.GET.status_message %}
+          <div class="alert alert-warning" role="alert">{{ request.GET.status_message }}</div>
+    {% else %}
+    <div class="alert alert-warning">
+       {% with total_items=cart|length %}
+        {% if cart|length > 0 %}
+            В вашому кошику 
+            <a href="{% url "basket" %}">
+                {{ total_items }} од.
+            </a>
+         {% else %}
+              Кошик пустий
+        {% endif %}
+    {% endwith %}
+    {% endif %}
+    </div>
+
+    <div class="row col-xs-4 col-xs-offset-4">
+    За вашим запитом нічого не знайдено!
+    </div>
+    </div>
+    {% endblock content %}
+
+
+
+
+
+
+

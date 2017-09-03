@@ -22,9 +22,6 @@
   телефон
  </th>
  <th>
-  замовлення
- </th>
- <th>
   сума
  </th>
  </tr>
@@ -38,8 +35,7 @@
   <td><a href='{% url 'one_order' order.id %}'>{{ forloop.counter }}</td>
   <td><a href='{% url 'one_order' order.id %}'>{{ order.name }}</td>
   <td><a href='{% url 'one_order' order.id %}'>{{ order.number }}</td>
-  <td><a href='{% url 'one_order' order.id %}'>{{ order.body }}</td>
-  <td><a href='{% url 'one_order' order.id %}'>{{ order.syma }}</td>
+  <td><a href='{% url 'one_order' order.id %}'>{{ order.total_cost }}</td>
 
  </tr>
 {% endfor %}

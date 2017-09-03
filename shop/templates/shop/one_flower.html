@@ -5,15 +5,22 @@
 
 
     {% block content %}
+    {% if request.GET.status_message %}
+          <div class="alert alert-warning" role="alert">{{ request.GET.status_message }}</div>
+    {% else %}
     <div class="alert alert-warning">
-    {% if buy_status %}
-       {% if buy_status %}
-       В кошику {{count}} {{ fl_count }}. <a href='{% url "basket" %}'>Переглянути їх?</a>
-      {% else %}
-      Для замовлення будь-ласка натисніть на кнопку "купити", а після цього перейдіть в закладку "кошик", де зможити оформити замовлення!
-      {% endif %}
-      {% endif %}
-      </div>
+       {% with total_items=cart|length %}
+        {% if cart|length > 0 %}
+            В вашому кошику 
+            <a href="{% url "basket" %}">
+                {{ total_items }} од.
+            </a>
+         {% else %}
+              Кошик пустий
+        {% endif %}
+    {% endwith %}
+    {% endif %}
+    </div>
 
     <!-- Start Main Page Content-->
     <div class="buy">
@@ -21,7 +28,7 @@
     </div>
     <div class="aticle">
     {% for fl in flower %}
-    <button class='to_basket bb' value='{{ fl.lat_title }}'>Купити</button></div>
+    <a href='{% url 'CartAdd' fl.id %}' class="btn btn-primary to_basket">в кошик</a>
     <div>
       <div class="title_lot_one"><h1>{{ fl.title }}</h1></div>
       <p id="text_about">{{ fl.description }}</p>

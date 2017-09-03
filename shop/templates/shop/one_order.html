@@ -6,17 +6,43 @@
 
 {% block content %}
     
-{% for order in order %}
+
  <div id='one_order'>
-
-  <div class="ord_one_col">{{ order.name }}</div>
-  <div class="ord_one_col">{{ order.number }}</div>
-  <div class="ord_one_col">{{ order.body }}</div>
-  <div class="ord_one_col">{{ order.syma }}</div>
-  <div class="ord_one_col">{{ order.notes }}</div>
-
+  <table class="table">
+  <tbody>
+  <tr>
+  <td>імя</td>
+  <td>{{ order.name }}</td>
+  </tr>
+  <tr>
+  <td>телефон</td>
+  <td>{{ order.number }}</td>
+  </tr>
+  <tr>
+  <td>Додаткові нотатки</td>
+  <td>{{ order.note }}</td>
+  </tr>
+  </tbody>
+  </table>
+<table>
+<tbody>
+  {% for item in products %}
+  <tr>
+  <td>
+    {{item.product}}
+  </td>
+  <td>
+    {{item.quantity}}
+  </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+  </div>
  </div>
-{% endfor %}
+
+
+
 
 {% endblock content %}
     

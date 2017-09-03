@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_POST
 from .models import Flower
-from .models import Order
+from .models import Order, OrderItem
 from .util import basket_list
 from .util import flow_count_name
 from .util import suma
@@ -11,15 +12,17 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.views.generic import UpdateView, CreateView, ListView, DeleteView
 from django.forms import ModelForm
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
-from crispy_forms.bootstrap import FormActions
-from crispy_forms.layout import Submit, Button
+from django import forms
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import permission_required
 from time import time
 from .util import is_digit
 from datetime import datetime
+from .cart import Cart
+from .forms import CartAddProductForm
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 
 
@@ -29,12 +32,76 @@ from datetime import datetime
 
 ###########################################################################
 def main_page(request):
-	flowers = Flower.objects.all()
-	fl_count = flow_count_name(request)
-	count = len(basket_list(request))
-	return render(request, 'shop/main.html', {'flowers':flowers, 'count': count,
-   'fl_count': fl_count})
+  cart = Cart(request)
+  flowers = Flower.objects.all()
+  fl_count = flow_count_name(request)
+  count = len(Cart(request))
+  # try to order flowers list
+  order_by = request.GET.get('order_by', '')
+  if order_by in ('price', '#'):
+    flowers = flowers.order_by(order_by)
+    if request.GET.get('reverse', '') == '1':
+      flowers = flowers.reverse()
+  #pagination
+  paginator = Paginator(flowers, 4)
+  page = request.GET.get('page')
+  try:
+    flowers = paginator.page(page)
+  except PageNotAnInteger:
+    flowers = paginator.page(1)
+  except EmptyPage:
+    flowers= paginator.page(paginator.num_pages)
+  return render(request, 'shop/main.html', {'flowers':flowers, 'count': count,
+     'fl_count': fl_count, 'count': count, 'cart': cart})
+  
 
+
+
+
+
+def CartAdd(request, flower_id):
+    cart = Cart(request)
+    flower = get_object_or_404(Flower, id=flower_id)
+    cart.add(flower=flower, quantity=1)
+    return redirect('main')
+
+
+
+
+def CartAdd_basket(request, flower_id):
+    cart = Cart(request)
+    flower = get_object_or_404(Flower, id=flower_id)
+    form = CartAddProductForm(request.POST)
+    if form.is_valid():
+        cd = form.cleaned_data
+        cart.add(flower=flower, quantity=cd['quantity'],
+                                  update_quantity=cd['update'])
+    return redirect('basket')
+
+
+
+
+
+def CartRemove(request, flower_id):
+    cart = Cart(request)
+    flower = get_object_or_404(Flower, id=flower_id)
+    cart.remove(flower)
+    return redirect('basket')
+
+
+
+
+
+
+def basket(request):
+    cart = Cart(request)
+    for item in cart:
+        item['update_quantity_form'] = CartAddProductForm(
+                                        initial={
+                                            'quantity': item['quantity'],
+                                            'update': True
+                                        })
+    return render(request, 'shop/basket.html', {'cart': cart})
 
 #####################################################################
 def about_me(request):
@@ -49,16 +116,10 @@ def contacts(request):
 
 
 
-
-
-
 ####################################################################
-def basket(request):
-   return render(request, 'shop/basket.html',
-     {'flowers':basket_list(request), 'price_list': suma(request)})
-
-
-
+@login_required
+def kabinet(request):
+  return render(request, 'shop/cabinet.html', {})
 
 
 
@@ -68,44 +129,47 @@ def basket(request):
 #order_confirm
 
 
-def order_confirm(request):
-  if request.method == "POST":
-    if request.POST.get('add_button') is not None:
-      errors = {}
-      data = {}
-      body = request.POST.get('body', '').strip()
-      data['body'] = body
-      syma = suma(request)
-      data['syma'] = syma
-      name = request.POST.get('name', '').strip()
-      if not name:
-        errors['name'] = u"Ведіть імя!"
-      else:
-        data['name'] = name
-      number = request.POST.get('number', '').strip()
-      if not number:
-        errors['number'] = u"Ведіть номер!"
-      else:
-        data['number'] = number
-      
-           
-      if not errors:
-        order = Order(**data)
-        order.save()
-        return HttpResponseRedirect( u'%s?status_message=Замовлення успішно сформовано!'  % reverse('main'))
-      else:
-        return render(request, 'shop/order_confirm.html',
-        {'flowers':basket_list(request), 'price_list': suma(request),'errors': errors})
-    elif request.POST.get('cancel_button') is not None:
-      return HttpResponseRedirect( u'%s?status_message=Формування замовлення скасовано!' % reverse('main'))
-  else:
-   return render(request, 'shop/order_confirm.html',
-     {'flowers':basket_list(request), 'price_list': suma(request)})
+def OrderCreate(request):
+    cart = Cart(request)
+    if request.method == 'POST':
+        errors = {}
+        data = {}
 
+        # validate user input
+        name = request.POST.get('name', '').strip()
+        if not name:
+          errors['name'] = u"Ім'я є обов'язковим"
+        else:
+          data['name'] = name
 
+        number = request.POST.get('number', '').strip()
+        if not number:
+          errors['number'] = u"Номер телефону є обов'язковим"
+        else:
+          data['number'] = number
 
+        notes = request.POST.get('notes', '').strip()
+        if notes:
+          data['notes'] = notes
+        
+        total_cost = request.POST.get('total_cost', '').strip()
+        data['total_cost'] = total_cost
+        
+        if not errors:
+          order = Order(**data)
+          order.save()
+          for item in cart:
+            OrderItem.objects.create(order=order, product=item['flower'],
+                                         price=item['price'],
+                                         quantity=item['quantity'])
+          cart.clear()
+          return HttpResponseRedirect( u'%s?status_message=Замовлення успішно збережено!' 
+              % reverse('main'))
+        else:
+          return render(request, 'shop/ordering.html',
+            {'errors': errors})
 
-
+    return render(request, 'shop/ordering.html', {'cart': cart})
 
 
 #####################################################################
@@ -113,7 +177,8 @@ def one_flower(request, pk):
   flower = Flower.objects.filter(pk=pk)
   fl_count = flow_count_name(request)
   count = len(basket_list(request))
-  return render(request, 'shop/one_flower.html', {'flower':flower, 'count': count, 'fl_count': fl_count})
+  return render(request, 'shop/one_flower.html', {'flower':flower, 'count': count,
+  	'fl_count': fl_count})
 
 
 
@@ -124,7 +189,7 @@ def one_flower(request, pk):
 
 
 ######################################################################
-@login_required
+@permission_required('auth.add_user')
 def orders(request):
   orders = Order.objects.all()
   return render(request, 'shop/orders.html', {'orders': orders})
@@ -288,9 +353,29 @@ class FlowerDelete(DeleteView):
 ###############################################################################
 
 def one_order(request, pk):
-  order = Order.objects.filter(pk=pk)
-  return render(request, 'shop/one_order.html', {'order':order})
+  order = Order.objects.get(pk=pk)
+  products = OrderItem.objects.filter(order=order)
+  return render(request, 'shop/one_order.html', {'order':order, 'products': products})
 
 
 
 
+###############################################################################
+
+def search(request):
+	errors = {}
+	title = request.POST.get('search', '').strip()
+	if not title:
+		errors['title'] = u"Введіть назву квітки"
+	flw = Flower.objects.filter(title=title)
+	if title:
+		return render(request, 'shop/one_flower.html', {'flower':flw,
+	      'errors': errors })
+	else:
+		return render(request, 'shop/no_one_flower.html', {})
+
+	
+
+
+      
+    

@@ -45,16 +45,35 @@ class Order(models.Model):
 	number = models.CharField(
       max_length=256,
       blank=False)
-	syma = models.CharField(
-      max_length=256,
-      blank=False)
-	body = models.TextField(
-      blank=True)
 	notes = models.TextField(
       blank=True)
+	total_cost = models.CharField(
+    max_length=256,
+	  blank=False)
+	def get_total_cost(self):
+		return sum(item.get_cost() for item in self.items.all())
+
 	def __unicode__(self):
 		return u'%s' % (self.name)
-    
-      
 
 
+
+
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order,
+     related_name='items')
+    product = models.ForeignKey(Flower,
+     related_name='order_items')
+    price = models.DecimalField(
+    	verbose_name='Ціна',
+    	max_digits=10,
+    	decimal_places=4)
+    quantity = models.PositiveIntegerField(
+    	verbose_name='Кількість',
+    	default=1)
+    def get_cost(self):
+    	return self.price * self.quantity
+    def __unicode__(self):
+		return u'%s' % (self.order)

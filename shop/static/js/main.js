@@ -47,10 +47,25 @@ function basket_form() {
 
 
 
+function initLangSelector() {
+    $('#lang-selector select').change(function(event){
+        var lan = $(this).val();
+        if (lan) {
+            $.cookie('django_language', lan, {'path': '/', 'expires': 365});
+        } else {
+            $.removeCookie('django_language', {'path': '/'});
+        }
+        location.reload(true);
+        return true;
+     });
+    }
+
+
 
 
 $(document).ready(function(){
     to_basket();
     from_basket();
-    basket_form()
+    basket_form();
+    initLangSelector()
 });
